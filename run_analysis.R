@@ -1,9 +1,13 @@
 require(dplyr)
+require(memisc)
 
-activity_info <- read.delim('data/activity_labels.txt', col.names = c('ActivityId', 'Activity'), header = FALSE, sep = '')
-feature_info <- read.delim('data/features.txt', col.names = c('FeatureId', 'Feature'), header = FALSE, sep = '')
+dataDir <- 'data'
+outputDir <- 'output'
 
-getData <- function(dataName, dataFolder = 'data') {
+activity_info <- read.delim(file.path(dataDir, 'activity_labels.txt'), col.names = c('ActivityId', 'Activity'), header = FALSE, sep = '')
+feature_info <- read.delim(file.path(dataDir, 'features.txt'), col.names = c('FeatureId', 'Feature'), header = FALSE, sep = '')
+
+getData <- function(dataName, dataFolder = dataDir) {
   getFilePath <- function(fileName) {
     return(file.path(dataFolder, dataName, fileName))
   }
@@ -24,4 +28,11 @@ tidyData <- bind_rows(getData('train'), getData('test')) %>% # Bind all rows in 
   group_by(Activity, SubjectId) %>% # Group them by the `Activity` and `SubjectId` values
   summarise_all(funs(mean)) # Get mean of all the other variables in the dataset
 
-write.table(tidyData, file = 'tidyData.txt', row.names = FALSE)
+if(!file.exists(outputDir)) {
+  dir.create(outputDir)
+}
+
+write.table(tidyData, file = file.path(outputDir, 'tidydata.txt'), row.names = FALSE)
+
+tidyData <- as.data.set(tidyData)
+Write(codebook(tidyData), file.path(outputDir, 'tidydata.cdbk.txt'))
