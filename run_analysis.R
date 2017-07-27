@@ -16,10 +16,12 @@ getData <- function(dataName, dataFolder = dataDir) {
   
   activities <- read.delim(getFilePath(paste0('y_', dataName, '.txt')), col.names = c('ActivityId'), header = FALSE, sep = '') %>% 
     left_join(activity_info, by = 'ActivityId') %>% 
-    select(Activity)
+    dplyr::select(Activity)
   
+  # Read the measurement data and take only the mean and standard deviation data
   measurements <- read.delim(getFilePath(paste0('X_', dataName, '.txt')), col.names = feature_info[,2], header = FALSE, sep = '') %>%
-    select(matches('\\.(mean|std)\\.'))
+    dplyr::select(matches('\\.(mean|std)\\.'))
+  # Converting the variable names to something more meaningful
   
   return(bind_cols(subjects, activities, measurements))
 }
@@ -34,5 +36,9 @@ if(!file.exists(outputDir)) {
 
 write.table(tidyData, file = file.path(outputDir, 'tidydata.txt'), row.names = FALSE)
 
-tidyData <- as.data.set(tidyData)
+tidyData <- within(as.data.set(tidyData), {
+  description(Activity) <- 'The activity monitored'
+  description(SubjectId) <- 'The ID of the subject'
+  
+})
 Write(codebook(tidyData), file.path(outputDir, 'tidydata.cdbk.txt'))
