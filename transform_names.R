@@ -1,5 +1,4 @@
 transformNames <- function(names) {
-  
   # Abbreviation patterns
   patterns <- matrix(c(
     '^t', 'Timed', 
@@ -18,10 +17,5 @@ transformNames <- function(names) {
     names <<- sub(pattern[[1]], pattern[[2]], names)
   })
   
-  # Add spaces to improve readability
-  names <- gsub('([A-Z-])', ' \\1', names)
-  
-  print(names)
+  return(names)
 }
-
-transformNames(names)

@@ -1,5 +1,5 @@
 require(dplyr)
-require(memisc)
+source('transform_names.R')
 
 dataDir <- 'data'
 outputDir <- 'output'
@@ -22,6 +22,7 @@ getData <- function(dataName, dataFolder = dataDir) {
   measurements <- read.delim(getFilePath(paste0('X_', dataName, '.txt')), col.names = feature_info[,2], header = FALSE, sep = '') %>%
     dplyr::select(matches('\\.(mean|std)\\.'))
   # Converting the variable names to something more meaningful
+  names(measurements) <- transformNames(names(measurements))
   
   return(bind_cols(subjects, activities, measurements))
 }
@@ -35,10 +36,3 @@ if(!file.exists(outputDir)) {
 }
 
 write.table(tidyData, file = file.path(outputDir, 'tidydata.txt'), row.names = FALSE)
-
-tidyData <- within(as.data.set(tidyData), {
-  description(Activity) <- 'The activity monitored'
-  description(SubjectId) <- 'The ID of the subject'
-  
-})
-Write(codebook(tidyData), file.path(outputDir, 'tidydata.cdbk.txt'))
